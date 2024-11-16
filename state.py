@@ -1,6 +1,7 @@
 from cellTypes import Type
 from direction import Direction
 from cell import Cell
+import copy
 class State:
     
     def __init__(self, grid, status = False, prev_states = None, next_states = []):
@@ -24,6 +25,15 @@ class State:
             return {'row': new_row, 'column': new_col}
         else:
             return None 
+        
+    @classmethod
+    def checkGridEquation(cls, grid1, grid2):
+        for row1, row2 in zip(grid1, grid2):
+            for cell1, cell2 in zip(row1, row2):
+                if cell1.color != cell2.color or cell1.type != cell2.type:
+                    return False
+                
+        return True
         
     def getPlayerCells(self,grid):
         player_cells = []
@@ -53,6 +63,7 @@ class State:
         for index_row, row in enumerate(grid):
             for index_col, col in enumerate(row):
                 if(col.type == cell.type and col.color == cell.color):
+                    print('test for', col.type == cell.type and col.color == cell.color)
                     return {
                         'cell':col,
                         'row': index_row,
@@ -62,18 +73,25 @@ class State:
         
     def checkAvailableMoves(self):
         available_moves = []
-        player_cells = self.getPlayerCells(self.grid)
+        grid = copy.deepcopy(self.grid)
+        player_cells = self.getPlayerCells(grid)
         for cell in player_cells:
             for direction in Direction.list():
-                if(self.checkMove(cell['row'], cell['column'], self.grid, direction)):
+                if(self.checkMove(cell['row'], cell['column'], grid, direction) and direction not in available_moves):
                     available_moves.append(direction)
         return available_moves
     
-    def move(self, grid, direction, count=0):
+
+    def move(self, grid, direction, check = True, count=0):
+        # Create a deep copy of the grid to avoid modifying the original
+        grid = copy.deepcopy(grid)
+        
         availability = []
+        status = False
         running = True
         player_cells = self.getPlayerCells(grid)
         availability_row = [False for _ in range(len(player_cells))]
+
         while running:
             availability.append(availability_row[:])
 
@@ -89,42 +107,60 @@ class State:
         print(availability)
         for index_row, row in enumerate(availability):
             for index_col, col in enumerate(row):
-                print(col, index_row, index_col)
-                print()
                 if col:
                     grid_cell = self.getPlayerCell(player_cells[index_col]['cell'], grid)
+                    print(grid_cell)
                     directional_cell = self.getDirectionalCell(grid_cell['row'], grid_cell['column'], direction)
-                    
+
                     if directional_cell is not None and self.checkMove(grid_cell['row'], grid_cell['column'], grid, direction):
-                        # print(grid[grid_cell['row']][grid_cell['column']].type == Type.GOAL.value)
-                        if(grid[directional_cell['row']][directional_cell['column']].type == Type.GOAL.value and grid[directional_cell['row']][directional_cell['column']].color == player_cells[index_col]['cell'].color):
-                            grid[grid_cell['row']][grid_cell['column']], grid[directional_cell['row']][directional_cell['column']] = \
-                                Cell(Type.EMPTY.value), Cell(Type.EMPTY.value)
-                            self.status = True
-                            break
-                               
-                        if(grid[directional_cell['row']][directional_cell['column']].type == Type.GOAL.value and grid[directional_cell['row']][directional_cell['column']].color != player_cells[index_col]['cell'].color):
-                             grid[grid_cell['row']][grid_cell['column']].previous_color = grid[directional_cell['row']][directional_cell['column']].color
-                             
-                        grid[grid_cell['row']][grid_cell['column']], grid[directional_cell['row']][directional_cell['column']] = \
-                            grid[directional_cell['row']][directional_cell['column']], grid[grid_cell['row']][grid_cell['column']]
-                            
-                        if(grid[directional_cell['row']][directional_cell['column']].previous_color is not None):
-                            if(grid[grid_cell['row']][grid_cell['column']].color is None):
-                                grid[grid_cell['row']][grid_cell['column']] = Cell(Type.GOAL.value,grid[directional_cell['row']][directional_cell['column']].previous_color)
+                        # Handle goal cells
+                        print('test')
+                        print(grid[directional_cell['row']][directional_cell['column']].type == Type.GOAL.value 
+                                and grid[directional_cell['row']][directional_cell['column']].color == player_cells[index_col]['cell'].color
+                                and len(self.getPlayerCells(grid)) <= 1)
+                        if (grid[directional_cell['row']][directional_cell['column']].type == Type.GOAL.value 
+                                and grid[directional_cell['row']][directional_cell['column']].color == player_cells[index_col]['cell'].color
+                                ):
+                            grid[grid_cell['row']][grid_cell['column']] = Cell(Type.EMPTY.value)
+                            grid[directional_cell['row']][directional_cell['column']] = Cell(Type.EMPTY.value)
+                            if check and len(self.getPlayerCells(grid)) <= 1:
+                                status = True
+                                print(self.status)
+                                return State(grid, status, self, [])
+
+                        if (grid[directional_cell['row']][directional_cell['column']].type == Type.GOAL.value 
+                                and grid[directional_cell['row']][directional_cell['column']].color != player_cells[index_col]['cell'].color):
+                            grid[grid_cell['row']][grid_cell['column']].previous_color = grid[directional_cell['row']][directional_cell['column']].color
+                        
+                        # Swap cells
+                        grid[grid_cell['row']][grid_cell['column']], grid[directional_cell['row']][directional_cell['column']] = (
+                            grid[directional_cell['row']][directional_cell['column']],
+                            grid[grid_cell['row']][grid_cell['column']]
+                        )
+
+                        if grid[directional_cell['row']][directional_cell['column']].previous_color is not None:
+                            if grid[grid_cell['row']][grid_cell['column']].color is None:
+                                grid[grid_cell['row']][grid_cell['column']] = Cell(Type.GOAL.value, grid[directional_cell['row']][directional_cell['column']].previous_color)
                                 grid[directional_cell['row']][directional_cell['column']].previous_color = None
                             else:
                                 grid[grid_cell['row']][grid_cell['column']] = Cell(Type.EMPTY.value)
-                        
+
+                        # Update player cell
                         player_cells[index_col] = {
-                            'cell':grid[directional_cell['row']][directional_cell['column']],
+                            'cell': grid[directional_cell['row']][directional_cell['column']],
                             'row': directional_cell['row'],
-                            'column':directional_cell['column']
+                            'column': directional_cell['column']
                         }
-        
-        return State(grid, False, self, [])
+
+        return State(grid, status, self, [])
+
     
     def getNextStates(self):
         available_moves = self.checkAvailableMoves()
         for move in available_moves:
-            self.next_states.append([self.move(self.grid, move), move])
+            # Deep copy the grid to avoid modifying the current state's grid
+            new_grid = copy.deepcopy(self.grid)
+            new_state = self.move(new_grid, move) # Create the new state with the copied grid
+            self.next_states.append([new_state, move])
+        print("next_state")
+        print(self.next_states)

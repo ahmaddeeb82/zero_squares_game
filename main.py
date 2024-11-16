@@ -4,35 +4,54 @@ from cellTypes import Type
 from direction import Direction
 from cell import Cell
 from color import Color
+from algorithms import Algorithms
 
 
 
 pygame.init()
 
+# grid = [
+#     [Cell(Type.EMPTY.value) for _ in range(6)] for _ in range(1)
+# ]
+
+# grid[0][0] = Cell(Type.PLAYER.value, Color.RED.value)
+# grid[0][5] = Cell(Type.GOAL.value, Color.RED.value)
+
+
 grid = [
-    [Cell(Type.EMPTY.value) for _ in range(5)] for _ in range(10)
+    [Cell(Type.EMPTY.value) for _ in range(6)] for _ in range(10)
 ]
 
-grid[2][0] = Cell(Type.PLAYER.value, Color.RED.value)
+grid[0][0] = Cell(Type.WALL.value)
+grid[0][2] = Cell(Type.WALL.value)
+grid[0][3] = Cell(Type.WALL.value)
 grid[1][3] = Cell(Type.WALL.value)
-grid[2][1] = Cell(Type.WALL.value)
 grid[2][3] = Cell(Type.WALL.value)
-grid[3][3] = Cell(Type.WALL.value)
-grid[4][2] = Cell(Type.WALL.value)
-grid[4][3] = Cell(Type.WALL.value)
-grid[6][4] = Cell(Type.WALL.value)
-grid[7][0] = Cell(Type.WALL.value)
-grid[7][1] = Cell(Type.WALL.value)
+grid[2][0] = Cell(Type.WALL.value)
+grid[2][1] = Cell(Type.WALL.value)
+grid[3][4] = Cell(Type.WALL.value)
+grid[3][5] = Cell(Type.WALL.value)
+grid[4][0] = Cell(Type.WALL.value)
+grid[6][0] = Cell(Type.WALL.value)
+grid[6][1] = Cell(Type.WALL.value)
+grid[6][2] = Cell(Type.WALL.value)
 grid[7][2] = Cell(Type.WALL.value)
-grid[8][0] = Cell(Type.WALL.value)
-grid[9][0] = Cell(Type.WALL.value)
-grid[9][1] = Cell(Type.WALL.value)
+grid[8][2] = Cell(Type.WALL.value)
 grid[9][2] = Cell(Type.WALL.value)
+grid[6][4] = Cell(Type.WALL.value)
+grid[6][5] = Cell(Type.WALL.value)
 grid[9][3] = Cell(Type.WALL.value)
-grid[9][4] = Cell(Type.WALL.value)
-grid[3][2] = Cell(Type.GOAL.value, Color.RED.value)
-grid[1][2] = Cell(Type.PLAYER.value, Color.BLUE.value) 
-grid[0][4] = Cell(Type.GOAL.value, Color.BLUE.value) 
+grid[9][5] = Cell(Type.WALL.value)
+grid[5][2] = Cell(Type.WALL.value)
+grid[0][1] = Cell(Type.GOAL.value, Color.RED.value)
+grid[5][3] = Cell(Type.GOAL.value, Color.ORANGE.value)
+grid[7][4] = Cell(Type.GOAL.value, Color.BLUE.value)
+grid[9][4] = Cell(Type.GOAL.value, Color.GREEN.value)
+grid[3][3] = Cell(Type.PLAYER.value, Color.RED.value)
+grid[3][0] = Cell(Type.PLAYER.value, Color.BLUE.value)
+grid[5][0] = Cell(Type.PLAYER.value, Color.ORANGE.value)
+grid[5][5] = Cell(Type.PLAYER.value, Color.GREEN.value)
+
 
 
 WIDTH, HEIGHT = len(grid[0] * 50), len(grid * 50)
@@ -61,6 +80,33 @@ COLS = len(grid[0]) if ROWS > 0 else 0
 
 
 state = State(grid)
+print("pathzzzzzzzzzzzzzzz")
+path = []
+
+class Button:
+    def __init__(self, text, x, y, width, height, color=(200,200,200), hover_color=(100,100,100)):
+        self.text = text
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = color
+        self.hover_color = hover_color
+
+    def draw(self, screen, mouse_pos):
+        color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.color
+        pygame.draw.rect(screen, color, self.rect, border_radius=5)
+        text_surface = font.render(self.text, True, (0,0,0))
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+
+    def is_clicked(self, mouse_pos, mouse_click):
+        return self.rect.collidepoint(mouse_pos) and mouse_click
+    
+bfs_button = Button("BFS", WIDTH/4, HEIGHT/20, WIDTH/2, HEIGHT/4)
+dfs_button = Button("DFS", WIDTH/4, (7 * HEIGHT)/20, WIDTH/2, HEIGHT/4)
+play_button = Button("Play", WIDTH/4, (13 * HEIGHT)/20, WIDTH/2, HEIGHT/4)
+
+bfs = False
+dfs = False
+play = False
 
 def draw_grid(grid):
 
@@ -91,8 +137,8 @@ def draw_grid(grid):
                 pygame.draw.rect(screen, previous_color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE), 3) 
             else:
                 pygame.draw.rect(screen, (0, 0, 0), (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE), 1) 
-
-def handle_input(state):
+state_number = [0]
+def handle_input(state, state_number):
 
     keys = pygame.key.get_pressed()
     
@@ -106,6 +152,7 @@ def handle_input(state):
         state = state.move(state.grid, Direction.LEFT.value)
 
     elif keys[pygame.K_RIGHT]:
+        state_number[0]  += 1
         state = state.move(state.grid, Direction.RIGHT.value)
 
     return state
@@ -143,29 +190,58 @@ def reset_game():
     grid[1][4] = Cell(Type.GOAL.value)    
     state = State(grid)
 
-
+print(play)
 running = True
 while running:
     screen.fill((255, 255, 255))
+    print(play)
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_click = pygame.mouse.get_pressed()[0]  # Left mouse button
+
+    if not bfs and not dfs and not play:
+        bfs_button.draw(screen, mouse_pos)
+        dfs_button.draw(screen, mouse_pos)
+        play_button.draw(screen, mouse_pos)
+
+
+    # Check for button clicks
+    if bfs_button.is_clicked(mouse_pos, mouse_click):
+        path = Algorithms.generateBFSPath(state)
+        bfs = True
+        pygame.time.wait(200)  # Small delay for visual feedback
+
+    if dfs_button.is_clicked(mouse_pos, mouse_click):
+        path = Algorithms.generateDFSPath(state)
+        bfs = True # Call DFS
+        pygame.time.wait(200) 
+        
+    if play_button.is_clicked(mouse_pos, mouse_click):
+        play = True # Call DFS
+            
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if state.status:  
-                if show_success_message().collidepoint(event.pos):
-                    reset_game()  
+            running = False 
 
-    if state.status:
-        show_success_message()  
-    else:
-       
-        state = handle_input(state)
+    if bfs or dfs:
+        state = handle_input(state, state_number)
+        print(state_number[0])
+        draw_grid(path[state_number[0]].grid)
+    if play :
+        state = handle_input(state, state_number)
+        print(state_number[0])
         draw_grid(state.grid)
+            
 
 
     pygame.display.flip()
     clock.tick(10) 
+
+# for state in path:
+#     screen.fill((255, 255, 255))
+#     for x in range(2000):
+#         draw_grid(state.grid)
 
 
 pygame.quit()
