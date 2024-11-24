@@ -28,17 +28,17 @@ class Algorithms:
             queue.put(next_state[0])
         return cls.bfs(queue,visited_states)
     
-    @classmethod
-    def generateBFSPath(cls,initial_state):
-        bfs_queue = Queue(-1)
-        bfs_queue.put(initial_state)
-        visited_states = []
-        path = []
-        state = cls.bfs(bfs_queue,visited_states)
-        while state is not None:
-            path.append(state)
-            state = state.prev_states
-        return path
+    # @classmethod
+    # def generateBFSPath(cls,initial_state):
+    #     bfs_queue = Queue(-1)
+    #     bfs_queue.put(initial_state)
+    #     visited_states = []
+    #     path = []
+    #     state = cls.bfs(bfs_queue,visited_states)
+    #     while state is not None:
+    #         path.append(state)
+    #         state = state.prev_states
+    #     return path
     
     @classmethod
     def generateBFSPath(cls,initial_state):
@@ -75,8 +75,35 @@ class Algorithms:
                 if next_state[0] and not any(State.checkGridEquation(next_state[0].grid, state.grid) for state in path):
                     stack.append((next_state[0], path + [current_state]))
         return []
-
     
+    @classmethod
+    def dfs(cls, stack, visited_states):
+        state = stack.pop()
+        add_state = True
+        for visited_state in visited_states:
+            if State.checkGridEquation(state.grid, visited_state.grid):
+                add_state = False
+                break
+        if(add_state):
+            visited_states.append(state)
+        if visited_states[-1].status:
+            return state
+        state.getNextStates()
+        for next_state in state.next_states:
+            stack.append(next_state[0])
+        return cls.dfs(stack,visited_states)
+    
+    @classmethod
+    def recursiveDFS(cls,initial_state):
+        stack = [initial_state]
+        visited_states = []
+        path = []
+        state = cls.dfs(stack,visited_states)
+        while state is not None:
+            path.append(state)
+            state = state.prev_states
+        path.reverse()
+        return path
     
         
         

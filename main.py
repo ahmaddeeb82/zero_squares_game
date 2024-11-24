@@ -60,7 +60,7 @@ CELL_SIZE = 50
 player_color = Color.getColor(Color.ORANGE.value)
 
 COLOR_EMPTY = (255, 255, 255)
-COLOR_WALL = (100, 100, 100)
+COLOR_WALL = (0, 0, 0)
 COLOR_TEXT = (0, 0, 0)
 COLOR_BUTTON = (200, 50, 50)
 COLOR_BUTTON_HOVER = (255, 80, 80)
@@ -211,7 +211,7 @@ while running:
         pygame.time.wait(200)  # Small delay for visual feedback
 
     if dfs_button.is_clicked(mouse_pos, mouse_click):
-        path = Algorithms.generateDFSPath(state)
+        path = Algorithms.recursiveDFS(state)
         bfs = True # Call DFS
         pygame.time.wait(200) 
         
