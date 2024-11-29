@@ -206,7 +206,7 @@ while running:
 
     # Check for button clicks
     if bfs_button.is_clicked(mouse_pos, mouse_click):
-        path = Algorithms.generateBFSPath(state)
+        path = Algorithms.generateUCSPath(state)
         bfs = True
         pygame.time.wait(200)  # Small delay for visual feedback
 

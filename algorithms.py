@@ -3,6 +3,7 @@ from queue import Queue
 import numpy as np
 from direction import Direction
 from collections import deque
+from heapq import heappush, heappop
 
 class Algorithms:
     
@@ -105,5 +106,33 @@ class Algorithms:
         path.reverse()
         return path
     
+    from heapq import heappush, heappop
+
+    @classmethod
+    def generateUCSPath(cls, initial_state):
+        priority_queue = []
+        heappush(priority_queue, (initial_state.cost, initial_state, []))
+        visited = set()
+
+        while priority_queue:
+            current_cost, current_state, path = heappop(priority_queue)
+
+            if current_state.status:
+                return path + [current_state]
+
+            state_key = tuple(tuple(cell.type for cell in row) for row in current_state.grid)
+            if state_key in visited:
+                continue
+            visited.add(state_key)
+
+            current_state.getNextStates()
+            for next_state in current_state.next_states:
+                if next_state[0]:
+                    next_state_cost = next_state[0].cost
+
+                    if not any(State.checkGridEquation(next_state[0].grid, state.grid) for state in path):
+                        heappush(priority_queue, (next_state_cost, next_state[0], path + [current_state]))
+
+        return []
         
         

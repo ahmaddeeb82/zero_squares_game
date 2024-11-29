@@ -4,11 +4,12 @@ from cell import Cell
 import copy
 class State:
     
-    def __init__(self, grid, status = False, prev_states = None, next_states = []):
+    def __init__(self, grid, status = False, prev_states = None, next_states = [], cost = 0):
         self.grid = grid
         self.status = status
         self.prev_states = prev_states
         self.next_states = next_states
+        self.cost = cost
         
     def getDirectionalCell(self, row, column, direction,count = 1):
         new_row, new_col = row, column
@@ -83,7 +84,6 @@ class State:
     
 
     def move(self, grid, direction, check = True, count=0):
-        # Create a deep copy of the grid to avoid modifying the original
         grid = copy.deepcopy(grid)
         
         availability = []
@@ -113,7 +113,6 @@ class State:
                     directional_cell = self.getDirectionalCell(grid_cell['row'], grid_cell['column'], direction)
 
                     if directional_cell is not None and self.checkMove(grid_cell['row'], grid_cell['column'], grid, direction):
-                        # Handle goal cells
                         print('test')
                         print(grid[directional_cell['row']][directional_cell['column']].type == Type.GOAL.value 
                                 and grid[directional_cell['row']][directional_cell['column']].color == player_cells[index_col]['cell'].color
@@ -132,7 +131,6 @@ class State:
                                 and grid[directional_cell['row']][directional_cell['column']].color != player_cells[index_col]['cell'].color):
                             grid[grid_cell['row']][grid_cell['column']].previous_color = grid[directional_cell['row']][directional_cell['column']].color
                         
-                        # Swap cells
                         grid[grid_cell['row']][grid_cell['column']], grid[directional_cell['row']][directional_cell['column']] = (
                             grid[directional_cell['row']][directional_cell['column']],
                             grid[grid_cell['row']][grid_cell['column']]
@@ -145,7 +143,6 @@ class State:
                             else:
                                 grid[grid_cell['row']][grid_cell['column']] = Cell(Type.EMPTY.value)
 
-                        # Update player cell
                         player_cells[index_col] = {
                             'cell': grid[directional_cell['row']][directional_cell['column']],
                             'row': directional_cell['row'],
@@ -154,13 +151,15 @@ class State:
 
         return State(grid, status, self, [])
 
+    def __lt__(self, other):
+        return self.cost < other.cost
     
     def getNextStates(self):
         available_moves = self.checkAvailableMoves()
         for move in available_moves:
-            # Deep copy the grid to avoid modifying the current state's grid
             new_grid = copy.deepcopy(self.grid)
-            new_state = self.move(new_grid, move) # Create the new state with the copied grid
+            new_state = self.move(new_grid, move)
+            new_state.cost = self.cost + 1
             self.next_states.append([new_state, move])
         print("next_state")
         print(self.next_states)
