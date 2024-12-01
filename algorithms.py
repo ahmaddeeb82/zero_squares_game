@@ -4,6 +4,7 @@ import numpy as np
 from direction import Direction
 from collections import deque
 from heapq import heappush, heappop
+from cellTypes import Type
 
 class Algorithms:
     
@@ -135,4 +136,53 @@ class Algorithms:
 
         return []
         
-        
+    @classmethod
+    def generateAStarPath(cls, initial_state):
+        priority_queue = []
+        heappush(priority_queue, (0, initial_state, [])) 
+        visited = set()
+
+        while priority_queue:
+            current_f, current_state, path = heappop(priority_queue)
+
+            if current_state.status:  
+                return path + [current_state]
+
+            state_key = tuple(tuple(cell.type for cell in row) for row in current_state.grid)
+            if state_key in visited:
+                continue
+            visited.add(state_key)
+
+            current_state.getNextStates()
+            for next_state in current_state.next_states:
+                if next_state[0]:
+                    g_cost = len(path) + 1  
+                    h_cost = cls.heuristic(next_state[0])  
+                    f_cost = g_cost + h_cost  
+
+                    if not any(State.checkGridEquation(next_state[0].grid, state.grid) for state in path):
+                        heappush(priority_queue, (f_cost, next_state[0], path + [current_state]))
+
+        return []
+
+    @staticmethod
+    def heuristic(state):
+        player_positions = [
+            (r, c)
+            for r, row in enumerate(state.grid)
+            for c, cell in enumerate(row)
+            if cell.type == Type.PLAYER.value
+        ]
+        goal_positions = [
+            (r, c)
+            for r, row in enumerate(state.grid)
+            for c, cell in enumerate(row)
+            if cell.type == Type.GOAL.value
+        ]
+
+        total_distance = 0
+        for player in player_positions:
+            distances = [abs(player[0] - goal[0]) + abs(player[1] - goal[1]) for goal in goal_positions]
+            total_distance += min(distances) if distances else 0
+
+        return total_distance

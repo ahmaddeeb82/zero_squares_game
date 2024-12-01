@@ -100,12 +100,21 @@ class Button:
     def is_clicked(self, mouse_pos, mouse_click):
         return self.rect.collidepoint(mouse_pos) and mouse_click
     
-bfs_button = Button("BFS", WIDTH/4, HEIGHT/20, WIDTH/2, HEIGHT/4)
-dfs_button = Button("DFS", WIDTH/4, (7 * HEIGHT)/20, WIDTH/2, HEIGHT/4)
-play_button = Button("Play", WIDTH/4, (13 * HEIGHT)/20, WIDTH/2, HEIGHT/4)
+button_width = WIDTH * 0.6  # 60% of screen width
+button_height = HEIGHT * 0.1  # 10% of screen height
+button_x = (WIDTH - button_width) / 2  # Center horizontally
+button_spacing = HEIGHT * 0.05  # 5% of screen height for spacing
+
+bfs_button = Button("BFS", button_x, button_spacing, button_width, button_height)
+dfs_button = Button("DFS", button_x, bfs_button.rect.bottom + button_spacing, button_width, button_height)
+a_button = Button("A*", button_x, dfs_button.rect.bottom + button_spacing, button_width, button_height)
+ucs_button = Button("UCS", button_x, a_button.rect.bottom + button_spacing, button_width, button_height)
+play_button = Button("Play", button_x, ucs_button.rect.bottom + button_spacing, button_width, button_height)
 
 bfs = False
 dfs = False
+ucs = False
+a = False
 play = False
 
 def draw_grid(grid):
@@ -201,18 +210,30 @@ while running:
     if not bfs and not dfs and not play:
         bfs_button.draw(screen, mouse_pos)
         dfs_button.draw(screen, mouse_pos)
+        a_button.draw(screen, mouse_pos)
+        ucs_button.draw(screen, mouse_pos)
         play_button.draw(screen, mouse_pos)
 
 
     # Check for button clicks
     if bfs_button.is_clicked(mouse_pos, mouse_click):
-        path = Algorithms.generateUCSPath(state)
+        path = Algorithms.generateBFSPath(state)
         bfs = True
         pygame.time.wait(200)  # Small delay for visual feedback
+        
+    if a_button.is_clicked(mouse_pos, mouse_click):
+        path = Algorithms.generateAStarPath(state)
+        a = True
+        pygame.time.wait(200)
+        
+    if ucs_button.is_clicked(mouse_pos, mouse_click):
+        path = Algorithms.generateUCSPath(state)
+        ucs = True
+        pygame.time.wait(200)# Small delay for visual feedback
 
     if dfs_button.is_clicked(mouse_pos, mouse_click):
         path = Algorithms.recursiveDFS(state)
-        bfs = True # Call DFS
+        dfs = True # Call DFS
         pygame.time.wait(200) 
         
     if play_button.is_clicked(mouse_pos, mouse_click):
@@ -224,7 +245,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False 
 
-    if bfs or dfs:
+    if bfs or dfs or a or ucs:
         state = handle_input(state, state_number)
         print(state_number[0])
         draw_grid(path[state_number[0]].grid)
