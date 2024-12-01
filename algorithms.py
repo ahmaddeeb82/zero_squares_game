@@ -182,7 +182,8 @@ class Algorithms:
 
         total_distance = 0
         for player in player_positions:
-            distances = [abs(player[0] - goal[0]) + abs(player[1] - goal[1]) for goal in goal_positions]
-            total_distance += min(distances) if distances else 0
+            for goal in goal_positions:
+                if state.grid[player[0]][player[1]].color == state.grid[goal[0]][goal[1]].color:
+                    total_distance += abs(player[0] - goal[0]) + abs(player[1] - goal[1])
 
         return total_distance

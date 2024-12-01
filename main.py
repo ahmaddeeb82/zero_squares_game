@@ -10,47 +10,47 @@ from algorithms import Algorithms
 
 pygame.init()
 
-# grid = [
-#     [Cell(Type.EMPTY.value) for _ in range(6)] for _ in range(1)
-# ]
-
-# grid[0][0] = Cell(Type.PLAYER.value, Color.RED.value)
-# grid[0][5] = Cell(Type.GOAL.value, Color.RED.value)
-
-
 grid = [
-    [Cell(Type.EMPTY.value) for _ in range(6)] for _ in range(10)
+    [Cell(Type.EMPTY.value) for _ in range(6)] for _ in range(1)
 ]
 
-grid[0][0] = Cell(Type.WALL.value)
-grid[0][2] = Cell(Type.WALL.value)
-grid[0][3] = Cell(Type.WALL.value)
-grid[1][3] = Cell(Type.WALL.value)
-grid[2][3] = Cell(Type.WALL.value)
-grid[2][0] = Cell(Type.WALL.value)
-grid[2][1] = Cell(Type.WALL.value)
-grid[3][4] = Cell(Type.WALL.value)
-grid[3][5] = Cell(Type.WALL.value)
-grid[4][0] = Cell(Type.WALL.value)
-grid[6][0] = Cell(Type.WALL.value)
-grid[6][1] = Cell(Type.WALL.value)
-grid[6][2] = Cell(Type.WALL.value)
-grid[7][2] = Cell(Type.WALL.value)
-grid[8][2] = Cell(Type.WALL.value)
-grid[9][2] = Cell(Type.WALL.value)
-grid[6][4] = Cell(Type.WALL.value)
-grid[6][5] = Cell(Type.WALL.value)
-grid[9][3] = Cell(Type.WALL.value)
-grid[9][5] = Cell(Type.WALL.value)
-grid[5][2] = Cell(Type.WALL.value)
-grid[0][1] = Cell(Type.GOAL.value, Color.RED.value)
-grid[5][3] = Cell(Type.GOAL.value, Color.ORANGE.value)
-grid[7][4] = Cell(Type.GOAL.value, Color.BLUE.value)
-grid[9][4] = Cell(Type.GOAL.value, Color.GREEN.value)
-grid[3][3] = Cell(Type.PLAYER.value, Color.RED.value)
-grid[3][0] = Cell(Type.PLAYER.value, Color.BLUE.value)
-grid[5][0] = Cell(Type.PLAYER.value, Color.ORANGE.value)
-grid[5][5] = Cell(Type.PLAYER.value, Color.GREEN.value)
+grid[0][0] = Cell(Type.PLAYER.value, Color.RED.value)
+grid[0][5] = Cell(Type.GOAL.value, Color.RED.value)
+
+
+# grid = [
+#     [Cell(Type.EMPTY.value) for _ in range(6)] for _ in range(10)
+# ]
+
+# grid[0][0] = Cell(Type.WALL.value)
+# grid[0][2] = Cell(Type.WALL.value)
+# grid[0][3] = Cell(Type.WALL.value)
+# grid[1][3] = Cell(Type.WALL.value)
+# grid[2][3] = Cell(Type.WALL.value)
+# grid[2][0] = Cell(Type.WALL.value)
+# grid[2][1] = Cell(Type.WALL.value)
+# grid[3][4] = Cell(Type.WALL.value)
+# grid[3][5] = Cell(Type.WALL.value)
+# grid[4][0] = Cell(Type.WALL.value)
+# grid[6][0] = Cell(Type.WALL.value)
+# grid[6][1] = Cell(Type.WALL.value)
+# grid[6][2] = Cell(Type.WALL.value)
+# grid[7][2] = Cell(Type.WALL.value)
+# grid[8][2] = Cell(Type.WALL.value)
+# grid[9][2] = Cell(Type.WALL.value)
+# grid[6][4] = Cell(Type.WALL.value)
+# grid[6][5] = Cell(Type.WALL.value)
+# grid[9][3] = Cell(Type.WALL.value)
+# grid[9][5] = Cell(Type.WALL.value)
+# grid[5][2] = Cell(Type.WALL.value)
+# grid[0][1] = Cell(Type.GOAL.value, Color.RED.value)
+# grid[5][3] = Cell(Type.GOAL.value, Color.ORANGE.value)
+# grid[7][4] = Cell(Type.GOAL.value, Color.BLUE.value)
+# grid[9][4] = Cell(Type.GOAL.value, Color.GREEN.value)
+# grid[3][3] = Cell(Type.PLAYER.value, Color.RED.value)
+# grid[3][0] = Cell(Type.PLAYER.value, Color.BLUE.value)
+# grid[5][0] = Cell(Type.PLAYER.value, Color.ORANGE.value)
+# grid[5][5] = Cell(Type.PLAYER.value, Color.GREEN.value)
 
 
 
